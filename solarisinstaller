@@ -1,68 +1,10 @@
 #!/usr/bin/env python
+from config import Config
 from pathlib import Path
-from configparser import ConfigParser
-from rich.console import Console
-from rich.panel import Panel
 
-console = Console()
 userdir = str(Path.home())
 config = Path(userdir, '.SolarisInstaller')
 
-
-def initial_setup(configfile):
-    """
-    :param configfile: Config file of type pathlib.Path
-    :return:
-    This creates and populates the configuration variable file under ~/.SolarisInstaller
-    """
-
-    console.print("Entering first time setup for SolarisInstaller", style="bold green")
-    
-    cp = ConfigParser()
-    cp['path'] = {}
-
-    cp['path']['iso_home'] = prompt_for_dir("Enter the directory where ISO files will be stored")
-    cp['path']['iso_fs_home'] = prompt_for_dir("Enter the directory where ISO files will be extracted")
-
-    # Write the users config to file
-    print(f"Creating config file at {configfile}")
-    configfile.touch(mode=0o600)
-    with open(configfile, 'w') as cfg:
-        cp.write(cfg)
-
-
-def prompt_for_dir(message):
-    dirname = Path(input(f"{message}: "))
-    if not dirname.is_dir():
-        create = input(f"Path '{dirname}' does not exist. Would you like to create it? (Y/N): ")
-        if create.upper() == 'Y':
-            try:
-                dirname.mkdir()
-            except OSError as e:
-                print(f"Failure creating {dirname}. Reason: {e}")
-        else:
-            print(f"Skipping creation of {dirname}")
-    return str(dirname)
-
-
-class Config:
-    def __init__(self, filepath):
-        self.filepath = filepath
-        self.data = ConfigParser()
-        self.data.read(filepath)
-
-
-    def show_pretty(self):
-        print_data = []
-        for section in self.data.sections():
-            for option in self.data[section]:
-                print_data.append(f"{section}.{option}: {self.data[section][option]}")
-        console.print(Panel('\n'.join(print_data), title=f"Configuration: {self.filepath}", expand=False))
-
-
 if __name__ == "__main__":
-    if not config.exists():
-        initial_setup(config)
-
     cfg = Config(config)
     cfg.show_pretty()
