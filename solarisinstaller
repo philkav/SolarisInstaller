@@ -1,10 +1,38 @@
 #!/usr/bin/env python
 from config import Config
+from rich.console import Console
 from pathlib import Path
+from time import sleep
+import click
 
 userdir = str(Path.home())
 config = Path(userdir, '.SolarisInstaller')
+console = Console()
+
+def preflight():
+    sleep(2)
+
+def install(hostname, build):
+    sleep(10)
+
+def finish():
+    sleep(5)
+
+
+@click.command()
+@click.option('--hostname', '-n', help='Hostname of system you want to install')
+@click.option('--build', '-b', help='What Solaris build you want to install')
+def solarisinstaller(hostname, build):
+    with console.status("Executing tasks...") as status:
+        console.log(f"Performing preflight check...")
+        preflight()
+        console.log(f"Installing [bold green]{hostname}[/bold green] with [bold green]{build}[/bold green]")
+        install(hostname, build)
+        console.log("Finishing")
+        finish()
+
 
 if __name__ == "__main__":
     cfg = Config(config)
     cfg.show_pretty()
+    solarisinstaller()
